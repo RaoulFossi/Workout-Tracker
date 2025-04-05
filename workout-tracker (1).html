@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Club Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #4c66af;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .goals-section, .weekly-tracker, .leaderboard {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f0f2f5;
+        }
+        .member-row:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .total {
+            font-weight: bold;
+            background-color: #eef1f7;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            height: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .weekly-goal-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .weekly-goal {
+            width: 70px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4c66af;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3a508b;
+        }
+        #datePicker {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .add-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .member-input {
+            width: 120px;
+        }
+        .reps-input {
+            width: 80px;
+        }
+        .verification-input {
+            width: 200px;
+        }
+        #verificationPhoto {
+            display: none;
+        }
+        .photo-label {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .save-button {
+            background-color: #28a745;
+            padding: 8px 12px;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f0f2f5;
+            border-radius: 8px 8px 0 0;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 3px solid #4c66af;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Workout Club Tracker</h1>
+        <p>Track your progress and stay motivated with friends!</p>
+    </div>
+    
+    <div class="container">
+        <div class="tab-container">
+            <div class="tab active" onclick="openTab(event, 'tracker')">Daily Tracker</div>
+            <div class="tab" onclick="openTab(event, 'leaderboard')">Leaderboard</div>
+            <div class="tab" onclick="openTab(event, 'goals')">Set Goals</div>
+        </div>
+
+        <div id="tracker" class="tab-content active">
+            <div class="weekly-tracker">
+                <h2>This Week's Progress</h2>
+                <input type="date" id="datePicker" onchange="filterByDate()">
+                
+                <table id="workoutTable">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Date</th>
+                            <th>Exercise</th>
+                            <th>Reps</th>
+                            <th>Verification</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workoutData">
+                        <!-- Sample data -->
+                        <tr class="member-row">
+                            <td>Alex</td>
+                            <td>2025-04-01</td>
+                            <td>Push-ups</td>
+                            <td>25</td>
+                            <td><a href="#">View photo</a></td>
+                        </tr>
+                        <tr class="member-row">
+                            <td>Sam</td>
+                            <td>2025-04-01</td>
+                            <td>Sit-ups</td>
+                            <td>30</td>
+                            <td><a href="#">View video</a></td>
+                        </tr>
+                        <tr class="member-row">
+                            <td>Jamie</td>
+                            <td>2025-04-02</td>
+                            <td>Squats</td>
+                            <td>40</td>
+                            <td><a href="#">View photo</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Add Workout</h3>
+                <div class="add-form">
+                    <div class="form-group">
+                        <label for="memberName">Member:</label>
+                        <input type="text" id="memberName" class="member-input" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="exerciseType">Exercise:</label>
+                        <select id="exerciseType">
+                            <option value="Push-ups">Push-ups</option>
+                            <option value="Sit-ups">Sit-ups</option>
+                            <option value="Squats">Squats</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="repsCount">Reps:</label>
+                        <input type="number" id="repsCount" class="reps-input" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="verificationPhoto" class="photo-label">Upload Verification</label>
+                        <input type="file" id="verificationPhoto" accept="image/*,video/*">
+                    </div>
+                    <button class="save-button" onclick="addWorkout()">Save Workout</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="leaderboard" class="tab-content">
+            <div class="leaderboard">
+                <h2>Weekly Leaderboard</h2>
+                <p>Week of April 1-7, 2025</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Member</th>
+                            <th>Push-ups</th>
+                            <th>Sit-ups</th>
+                            <th>Squats</th>
+                            <th>% of Goal</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="member-row">
+                            <td>1</td>
+                            <td>Jamie</td>
+                            <td>75/100</td>
+                            <td>120/150</td>
+                            <td>90/100</td>
+                            <td>81%</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 81%">81%</div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="member-row">
+                            <td>2</td>
+                            <td>Alex</td>
+                            <td>65/100</td>
+                            <td>110/150</td>
+                            <td>75/100</td>
+                            <td>71%</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 71%">71%</div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="member-row">
+                            <td>3</td>
+                            <td>Sam</td>
+                            <td>60/100</td>
+                            <td>90/150</td>
+                            <td>70/100</td>
+                            <td>63%</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" style="width: 63%">63%</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="goals" class="tab-content">
+            <div class="goals-section">
+                <h2>Set Weekly Goals</h2>
+                <p>Define your weekly goals for each exercise</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Push-ups Goal</th>
+                            <th>Sit-ups Goal</th>
+                            <th>Squats Goal</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="member-row">
+                            <td>Alex</td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="100">
+                            </td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="150">
+                            </td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="100">
+                            </td>
+                            <td>
+                                <button>Update</button>
+                            </td>
+                        </tr>
+                        <tr class="member-row">
+                            <td>Sam</td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="100">
+                            </td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="150">
+                            </td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="100">
+                            </td>
+                            <td>
+                                <button>Update</button>
+                            </td>
+                        </tr>
+                        <tr class="member-row">
+                            <td>Jamie</td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="100">
+                            </td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="150">
+                            </td>
+                            <td>
+                                <input type="number" class="weekly-goal" value="100">
+                            </td>
+                            <td>
+                                <button>Update</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="buttons">
+                    <button onclick="addMember()">Add Member</button>
+                    <button onclick="saveGoals()">Save All Goals</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current date for the date picker
+        document.getElementById('datePicker').valueAsDate = new Date();
+        
+        // Tab functionality
+        function openTab(evt, tabName) {
+            let tabcontent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            
+            let tablinks = document.getElementsByClassName("tab");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        // Add workout functionality
+        function addWorkout() {
+            const memberName = document.getElementById('memberName').value;
+            const exerciseType = document.getElementById('exerciseType').value;
+            const repsCount = document.getElementById('repsCount').value;
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (!memberName || !repsCount) {
+                alert("Please fill in all fields");
+                return;
+            }
+            
+            const tbody = document.getElementById('workoutData');
+            const newRow = document.createElement('tr');
+            newRow.className = 'member-row';
+            
+            newRow.innerHTML = `
+                <td>${memberName}</td>
+                <td>${today}</td>
+                <td>${exerciseType}</td>
+                <td>${repsCount}</td>
+                <td><a href="#">View photo</a></td>
+            `;
+            
+            tbody.appendChild(newRow);
+            
+            // Clear the form
+            document.getElementById('memberName').value = '';
+            document.getElementById('repsCount').value = '';
+        }
+        
+        // Filter by date
+        function filterByDate() {
+            const selectedDate = document.getElementById('datePicker').value;
+            const rows = document.getElementById('workoutData').getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const dateCell = rows[i].getElementsByTagName('td')[1];
+                if (dateCell) {
+                    if (dateCell.textContent === selectedDate) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        // Add member functionality
+        function addMember() {
+            const tbody = document.querySelector('.goals-section tbody');
+            const newRow = document.createElement('tr');
+            newRow.className = 'member-row';
+            
+            newRow.innerHTML = `
+                <td><input type="text" placeholder="New Member"></td>
+                <td>
+                    <input type="number" class="weekly-goal" value="100">
+                </td>
+                <td>
+                    <input type="number" class="weekly-goal" value="150">
+                </td>
+                <td>
+                    <input type="number" class="weekly-goal" value="100">
+                </td>
+                <td>
+                    <button>Update</button>
+                </td>
+            `;
+            
+            tbody.appendChild(newRow);
+        }
+        
+        // Save goals functionality (placeholder)
+        function saveGoals() {
+            alert("Goals saved successfully!");
+        }
+    </script>
+</body>
+</html>
